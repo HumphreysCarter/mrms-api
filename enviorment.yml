@@ -6,3 +6,5 @@ channels:
 dependencies:
   - python=3.7
   - xarray=0.16.2
+  - requests
+  - bs4
