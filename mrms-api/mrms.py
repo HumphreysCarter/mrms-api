@@ -89,7 +89,7 @@ class dataset:
 			self.valid   = None
 			warnings.warn('Invalid File Format: Unable to discern product and valid time from filename, will set values to None. Run load_dataset() to import with grib reader.')
 
-	def load_dataset(self, engine='pygrib', data_only=False):
+	def load_dataset(self, engine='pygrib', data_only=False, extent=None):
 		"""
 		Returns an xarray dataset of the MRMS dataset. Optionally to speed up performance, if data_only is set to True, a numpy data array of the MRMS dataset is returned. The value of MRMSdatset.dataset is also set to the return value.
 
@@ -97,7 +97,7 @@ class dataset:
 		"""
 		# Read GRIB file with pygrib module
 		if engine.lower() == 'pygrib':
-			self.__load_with_pygrib(data_only)
+			self.__load_with_pygrib(data_only, extent)
 
 		# Read GRIB file with cfgrib module
 		elif engine.lower() == 'cfgrib':
@@ -138,7 +138,7 @@ class dataset:
 		else:
 			return None
 
-	def __load_with_pygrib(self, data_only):
+	def __load_with_pygrib(self, data_only, extent=None):
 		# Import pygrib module
 		import pygrib
 
@@ -155,12 +155,17 @@ class dataset:
 		# Get as xarray dataset
 		else:
 			# Get data, lat/lons, and valid date
-			data = grb.values
-			lats, lons = grb.latlons()
-			valid = grb.validDate
+			if extent != None:
+				minLat, maxLat, minLon, maxLon = extent
+				data, lats, lons = grb.data(lat1=minLat, lat2=maxLat, lon1=minLon, lon2=maxLon)
+				valid = grb.validDate
+			else:
+				data = grb.values
+				lats, lons = grb.latlons()
+				valid = grb.validDate
 
 			# Build xarray datset
-			ds = xr.Dataset(data_vars=dict(data=(['x', 'y'], data)), coords=dict(longitude=(['x', 'y'], lons), latitude=(['x', 'y'], lats),         time=valid), attrs=dict(description=self.product),)
+			ds = xr.Dataset(data_vars=dict(data=(['x', 'y'], data)), coords=dict(longitude=(['x', 'y'], lons), latitude=(['x', 'y'], lats), time=valid), attrs=dict(description=self.product),)
 
 			# Rename to use product name
 			ds = ds.rename({'data':self.product})
