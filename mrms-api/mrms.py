@@ -36,7 +36,7 @@ class ncep_ingest:
                 url = f'https://mrms.ncep.noaa.gov/data/{dim}/{var}/'
                 self.files += get_http_files(url=url, ext='gz')
         else:
-            url = f'https://mrms.ncep.noaa.gov/data/{dim}/{var}/'
+            url = f'https://mrms.ncep.noaa.gov/data/{dim}/{vars}/'
             self.files = get_http_files(url=url, ext='gz')
 
 class iastate_ingest:
