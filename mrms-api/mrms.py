@@ -39,6 +39,78 @@ class ncep_ingest:
             url = f'https://mrms.ncep.noaa.gov/data/{dim}/{vars}/'
             self.files = get_http_files(url=url, ext='gz')
 
+    def download(self, path, extract=True, mp=True, overwrite=False, cpu_pool=None):
+        """
+        doc string
+        """
+        localList = []
+
+        # Find files that already exist
+        if overwrite == True:
+            downloadList = self.files
+        else:
+            downloadList = []
+            for serverPath in self.files:
+                # Set local file path
+                fileName  = serverPath[serverPath.rfind('/')+1:]
+                localPath = f'{path}/{fileName}'.replace('.gz', '')
+
+                # Check if file exists, add to download list if False
+                if Path(localPath).exists() == False:
+                    downloadList.append(serverPath)
+                else:
+                    localList.append(localPath)
+
+        # Create argument list
+        args = [(file, path, extract) for file in downloadList]
+
+        # Download with multiprocessing
+        if mp == True:
+            # Get CPU pool
+            if cpu_pool == None or cpu_pool > cpu_count():
+                cpu_pool = cpu_count()
+
+            # Create multiprocessing processor pool
+            pool = Pool(processes=cpu_pool)
+            localList += pool.map(self.download_file, args)
+            pool.close()
+
+        # Download as single process
+        else:
+            for arg in args:
+                file = self.__download_file(arg)
+                localList.append(file)
+
+        # Update file list with local paths
+        self.files = localList
+
+    def download_file(self, args):
+        """
+        doc string
+        """
+        # Get args if set
+        serverPath, localPath, extract = args
+
+        # Set local file path
+        fileName  = serverPath[serverPath.rfind('/')+1:]
+        localPath = f'{localPath}/{fileName}'
+
+        # Download file from server
+        urllib.request.urlretrieve(serverPath, localPath)
+
+        # Extract Gzip file
+        if extract:
+            with gzip.open(localPath, 'rb') as f_in:
+                localPath = localPath.replace('.gz', '')
+                with open(localPath, 'wb') as f_out:
+                    shutil.copyfileobj(f_in, f_out)
+
+            # Remove compressed file
+            os.remove(f'{localPath}.gz')
+
+        return localPath
+
+
 class iastate_ingest:
     def __init__(self, date, vars):
         """
