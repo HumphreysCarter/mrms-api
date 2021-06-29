@@ -61,17 +61,20 @@ class iastate_ingest:
         localList = []
 
         # Find files that already exist
-        downloadList = []
-        for serverPath in self.files:
-            # Set local file path
-            fileName  = serverPath[serverPath.rfind('/')+1:]
-            localPath = f'{path}/MRMS_{fileName}'.replace('.gz', '')
+        if overwrite == True:
+            downloadList = self.files
+        else:
+            downloadList = []
+            for serverPath in self.files:
+                # Set local file path
+                fileName  = serverPath[serverPath.rfind('/')+1:]
+                localPath = f'{path}/MRMS_{fileName}'.replace('.gz', '')
 
-            # Check if file exists, add to download list if False
-            if Path(localPath).exists() == False:
-                downloadList.append(serverPath)
-            else:
-                localList.append(localPath)
+                # Check if file exists, add to download list if False
+                if Path(localPath).exists() == False:
+                    downloadList.append(serverPath)
+                else:
+                    localList.append(localPath)
 
         # Create argument list
         args = [(file, path, extract) for file in downloadList]
