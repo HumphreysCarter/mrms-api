@@ -321,8 +321,8 @@ class dataset:
 			# Set datset var
 			self.dataset = ds
 
-        # Close the grib file
-        grbs.close()
+		# Close the grib file
+		grbs.close()
 
 	def __load_with_cfgrib(self, data_only):
 		# Load datset with xarray and cfgrib engine
