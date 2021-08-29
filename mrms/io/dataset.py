@@ -43,6 +43,15 @@ class dataset:
 		# Return datset
 		return self.dataset
 
+	def get_point_value(self, lat, lon, method='nearest'):
+		"""
+		Returns a point value for given latitude, longitude
+		"""
+		# Get values at grid point for the lat/lon pair
+		ds = self.dataset.sel(latitude=lat, longitude=lon, method=method)
+
+		return ds
+
 	def __check_files_exists(self, path):
 		if os.path.isfile(path) == False:
 			raise FileNotFoundError(path)
