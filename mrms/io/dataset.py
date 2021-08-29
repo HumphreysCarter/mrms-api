@@ -34,7 +34,7 @@ class dataset:
 
 		# Read GRIB file with cfgrib module
 		elif engine.lower() == 'cfgrib':
-			self.__load_with_cfgrib(data_only)
+			self.__load_with_cfgrib(data_only, extent)
 
 		# Catch invalid engine
 		else:
@@ -109,9 +109,14 @@ class dataset:
 		# Close the grib file
 		grbs.close()
 
-	def __load_with_cfgrib(self, data_only):
+	def __load_with_cfgrib(self, data_only, extent=None):
 		# Load datset with xarray and cfgrib engine
 		ds = xr.load_dataset(self.path, engine='cfgrib')
+
+		# Cut to extent
+		if extent != None:
+			minLat, maxLat, minLon, maxLon = extent
+			ds = ds.sel(latitude=slice(maxLat, minLat), longitude=slice(minLon, maxLon))
 
 		# Get only data
 		if data_only == True:
@@ -120,7 +125,7 @@ class dataset:
 		# Get as xarray dataset
 		else:
 			# Rename to use product name
-			ds = ds.rename({'paramId_0':self.product})
+			#ds = ds.rename({'paramId_0':self.product})
 
 			# Set datset var
 			self.dataset = ds
