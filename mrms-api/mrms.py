@@ -175,27 +175,30 @@ class iastate_ingest:
         """
         doc string
         """
-        # Get args if set
-        serverPath, localPath, extract = args
+        try:
+            # Get args if set
+            serverPath, localPath, extract = args
 
-        # Set local file path
-        fileName  = serverPath[serverPath.rfind('/')+1:]
-        localPath = f'{localPath}/MRMS_{fileName}'
+            # Set local file path
+            fileName  = serverPath[serverPath.rfind('/')+1:]
+            localPath = f'{localPath}/MRMS_{fileName}'
 
-        # Download file from server
-        urllib.request.urlretrieve(serverPath, localPath)
+            # Download file from server
+            urllib.request.urlretrieve(serverPath, localPath)
 
-        # Extract Gzip file
-        if extract:
-            with gzip.open(localPath, 'rb') as f_in:
-                localPath = localPath.replace('.gz', '')
-                with open(localPath, 'wb') as f_out:
-                    shutil.copyfileobj(f_in, f_out)
+            # Extract Gzip file
+            if extract:
+                with gzip.open(localPath, 'rb') as f_in:
+                    localPath = localPath.replace('.gz', '')
+                    with open(localPath, 'wb') as f_out:
+                        shutil.copyfileobj(f_in, f_out)
 
-            # Remove compressed file
-            os.remove(f'{localPath}.gz')
+                # Remove compressed file
+                os.remove(f'{localPath}.gz')
 
-        return localPath
+            return localPath
+        except:
+            return None
 
 class ldm_ingest:
     def __init__(self, ldm_dir, vars):
