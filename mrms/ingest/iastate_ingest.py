@@ -83,6 +83,25 @@ class iastate:
 
         # Update file list with local paths
         self.files = localList
+        
+    def filterToTimeRange(self, start, end, inclusive=True):
+        """
+        doc string
+        """
+        updatedList = []
+        
+        for file in self.files:
+            fileName = file[file.rfind('_')+1:file.rfind('.grib2')]
+            fileTime = datetime.strptime(fileName, '%Y%m%d-%H%M%S')
+            
+            if inclusive:
+                if fileTime >= start and fileTime <= end:
+                    updatedList.append(file)
+            else:
+                if fileTime > start and fileTime < end:
+                    updatedList.append(file)
+                    
+        self.files = updatedList
 
     def download_file(self, args):
         """
